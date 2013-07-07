@@ -16,26 +16,29 @@ function reflectToMarkDown(objName) {
     var a = reflected[i];
     var value = obj[a];
     var sType = typeof value;
-    var sParms = value.toString().split(/\)\{/);
-    if (sParms.length>0) {
-      sParms = sParms[0].split('(');
-      if (sParms.length>0) {
-        if (typeof sParms[1]==='undefined') {
-          sParms = UNDEFINED
-        } else {
-          if (sParms[1].split(',').length<0 || sParms[1].indexOf('native code')>-1) {
-            sParms = UNDEFINED;
+    var sParms = ''
+    if (sType==='function') {
+      sParms = value.toString().split(/\)\{/);
+        if (sParms.length>0) {
+          sParms = sParms[0].split('(');
+          if (sParms.length>0) {
+            if (typeof sParms[1]==='undefined') {
+              sParms = UNDEFINED
+            } else {
+              if (sParms[1].split(',').length<0 || sParms[1].indexOf('native code')>-1) {
+                sParms = UNDEFINED;
+              } else {
+                sParms = sParms[1];
+              }
+            }
+    
           } else {
-            sParms = sParms[1];
-          }
-        }
-
-      } else {
-        sParms = UNDEFINED;
-      };
-    } else {
-      sParms = UNDEFINED;
-    };
+            sParms = UNDEFINED;
+          };
+        } else {
+          sParms = UNDEFINED;
+        };
+      }
       
     sMKDown+='| ['+objName+'.'+a+']('+objName+'.'+a+') | ['+sType+']('+sType+') |  '+sParms+'  |\n';
   };
