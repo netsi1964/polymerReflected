@@ -1,6 +1,8 @@
-function reflectToMarkDown(objName) {
+var globalObject;
+function reflectToMarkDown(objName, sUseThisName, scope) {
   var UNDEFINED = '-';
   var obj = eval(objName);
+  objName = (typeof sUseThisName!='undefined') ? sUseThisName + ((typeof scope!=='undefined') ? ' ('+scope+'&#41;' : '') : objName;
   var sMKDown = '';
   var reflected = [];
   for(a in obj) {
@@ -9,20 +11,30 @@ function reflectToMarkDown(objName) {
   reflected = reflected.sort(function(a,b){
     return (a>b) ? 1 : -1;
   });
-  sMKDown+='### ['+objName+']('+objName+'.md)\n\n';
-  sMKDown+='| Name | Type | Parameters |\n| ------------- | ------------- | ----- |\n';
+
+  var s = '';
+  var sofar = '';
+  var temp = objName.split('.');
+  for(var i=0; i<temp.length; i++) {
+    sofar+=((sofar!=='') ? '.' : '') + temp[i];
+    s+=((s!=='') ? '.' : '')+'['+temp[i]+']('+(sofar.replace(/\./g, ' '))+'.md)';
+  }
+
+  sMKDown+='### '+s+'\n\n';
+  sMKDown+='| Name | Type | Value |\n| ------------- | ------------- | ----- |\n';
 
   for(var i=0; i<reflected.length; i++) {
     var a = reflected[i];
     var value = obj[a];
-    var sType = typeof value;
-    var sParms = ''
+    var sType = (a.indexOf('on')===0) ? '_delegate_ (function&#41;' : typeof value;
+    var sParms = '';
     if (sType==='function') {
-      sParms = value.toString().split(/\)\{/);
+       sParms = value.toString().split(/\)\{/);
         if (sParms.length>0) {
           sParms = sParms[0].split('(');
           if (sParms.length>0) {
-            if (typeof sParms[1]==='undefined') {
+            var typo = typeof sParms[1];
+            if (typo==='undefined' || typo==='null') {
               sParms = UNDEFINED
             } else {
               if (sParms[1].split(',').length<0 || sParms[1].indexOf('native code')>-1) {
@@ -45,6 +57,7 @@ function reflectToMarkDown(objName) {
           sParms = sParms.split('\n')[0];  
           a+= '('+sParms+'&#41;';
         }
+        sParms = '';
         
      } else {
       try {
@@ -54,7 +67,7 @@ function reflectToMarkDown(objName) {
       }
        
     }
-    sMKDown+='| ['+a+']('+a+') | ['+sType+']('+sType+') |  '+sParms+'  |\n';
+    sMKDown+='| ['+a+']('+temp.join(' ')+' '+a+') | ['+sType+']('+sType+') |  '+sParms+'  |\n';
   };
-  console.log(sMKDown+'\nCreated using [reflectToMarkDown.js](reflectToMarkDown.js) on '+new Date());
+  console.log(sMKDown+'\nCreated using [reflectToMarkDown.js](reflectToMarkDown.js) on '+new Date()+'<br/>Using '+navigator.appVersion);
 }
