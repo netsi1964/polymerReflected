@@ -38,9 +38,23 @@ function reflectToMarkDown(objName) {
         } else {
           sParms = UNDEFINED;
         };
+        
+        if (sParms===UNDEFINED) {
+          a+= '(&#41;';
+        } else {
+          sParms = sParms.split('\n')[0];  
+          a+= '('+sParms+'&#41;';
+        }
+        
+     } else {
+      try {
+        sParms = value.toString();
+      } catch(e) {
+
       }
-      
-    sMKDown+='| ['+objName+'.'+a+']('+objName+'.'+a+') | ['+sType+']('+sType+') |  '+sParms+'  |\n';
+       
+    }
+    sMKDown+='| ['+a+']('+a+') | ['+sType+']('+sType+') |  '+sParms+'  |\n';
   };
   console.log(sMKDown+'\nCreated using [reflectToMarkDown.js](reflectToMarkDown.js) on '+new Date());
 }
